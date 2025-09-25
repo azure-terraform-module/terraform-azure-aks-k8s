@@ -18,7 +18,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     name       = var.default_node_pool.name
     vm_size    = var.default_node_pool.vm_size
     vnet_subnet_id = var.default_node_pool.vnet_subnet_id
-    temporary_name_for_rotation = "${var.default_node_pool.name}tempnp01"
+    temporary_name_for_rotation = substr(lower("temp${var.default_node_pool.name}"), 0, 12)
     orchestrator_version = var.kubernetes_version != null ? var.kubernetes_version : data.azurerm_kubernetes_service_versions.current.latest_version
     auto_scaling_enabled = var.default_node_pool.auto_scaling_enabled
     node_count           = var.default_node_pool.node_count
