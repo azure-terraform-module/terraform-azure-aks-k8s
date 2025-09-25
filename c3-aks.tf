@@ -26,8 +26,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     min_count            = var.default_node_pool.auto_scaling_enabled ? var.default_node_pool.min_count : null
     os_disk_size_gb      = var.default_node_pool.os_disk_size_gb
     type                 = "VirtualMachineScaleSets"
-    node_labels          = local.final_default_node_labels
-    tags                 = local.final_default_tags
+    node_labels          = var.default_node_pool.node_labels
+    tags                 = merge(var.global_tags, coalesce(try(var.default_node_pool.tags, null), {}))
   }
   # Identity (System Assigned or Service Principal)
   identity {

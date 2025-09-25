@@ -19,6 +19,12 @@ variable "kubernetes_version" {
     default     = null
 }
 
+variable "global_tags" {
+  description = "Tags merged into every node pool"
+  type        = map(string)
+  default     = {}
+}
+
 variable "default_node_pool" {
   description = "Configuration for the default AKS node pool."
   type = object({
@@ -50,4 +56,29 @@ variable "default_node_pool" {
       "nodepool-type" = "system"
     }
   }
+}
+
+variable "custom_node_pool" {
+  description = "List of custom node group configurations"
+  type = list(object({
+    name                     = string
+    vnet_subnet_id       = optional(string)
+    auto_scaling_enabled = bool
+    node_count           = number
+    max_count            = number
+    min_count            = number
+    os_type              = string
+    os_disk_size_gb      = number
+    priority             = string
+    node_labels          = map(string)
+    # Added optionals for real-world pools
+    vm_size               = optional(string)
+    mode                  = optional(string)                  # "User" or "System"
+    node_taints           = optional(list(string))
+    tags                  = optional(map(string))
+    max_pods              = optional(number)
+    # os_disk_type          = optional(string)                  # "Ephemeral" or "Managed"
+    eviction_policy       = optional(string)                  # for Spot: "Delete" or "Deallocate"
+    spot_max_price        = optional(number)                  # for Spot: -1 or a price in USD/hour
+  }))
 }
