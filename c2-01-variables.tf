@@ -23,7 +23,7 @@ variable "default_node_pool" {
   description = "Configuration for the default AKS node pool."
   type = object({
     name                 = string
-    vnet_subnet_id       = string
+    vnet_subnet_id       = optional(string)
     vm_size              = string
     auto_scaling_enabled = bool
     node_count           = number
@@ -37,7 +37,7 @@ variable "default_node_pool" {
   default = {
     name                 = "systempool"
     vnet_subnet_id       = null
-    vm_size              = "standard_b2s"
+    vm_size              = "Standard_B2s"
     auto_scaling_enabled = true
     node_count           = 2
     max_count            = 3

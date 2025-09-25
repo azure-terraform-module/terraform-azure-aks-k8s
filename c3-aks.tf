@@ -10,13 +10,13 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   default_node_pool {
     name       = var.default_node_pool.name
     vm_size    = var.default_node_pool.vm_size
-    vnet_subnet_id = data.terraform_remote_state.vnet.outputs.subnet_ids[0]
+    vnet_subnet_id = var.default_node_pool.vnet_subnet_id
     temporary_name_for_rotation = "${var.default_node_pool.name}-tempnp01"
     orchestrator_version = var.kubernetes_version != null ? var.kubernetes_version : data.azurerm_kubernetes_service_versions.current.latest_version
     auto_scaling_enabled = var.default_node_pool.auto_scaling_enabled
     node_count           = var.default_node_pool.node_count
-    max_count            = var.default_node_pool.max_count
-    min_count            = var.default_node_pool.min_count
+    max_count            = var.default_node_pool.auto_scaling_enabled ? var.default_node_pool.max_count : null
+    min_count            = var.default_node_pool.auto_scaling_enabled ? var.default_node_pool.min_count : null
     os_disk_size_gb      = var.default_node_pool.os_disk_size_gb
     type                 = "VirtualMachineScaleSets"
     node_labels          = local.final_default_node_labels
