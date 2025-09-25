@@ -81,4 +81,5 @@ variable "custom_node_pool" {
     eviction_policy       = optional(string)                  # for Spot: "Delete" or "Deallocate"
     spot_max_price        = optional(number)                  # for Spot: -1 or a price in USD/hour
   }))
+  default = []
 }

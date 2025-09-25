@@ -1,5 +1,6 @@
 locals {
-  pools_by_name = { for np in var.custom_node_pool : np.name => np }
+  node_pools    = coalesce(var.custom_node_pool, [])
+  pools_by_name = { for np in local.node_pools : np.name => np }
 }
 
 resource "azurerm_kubernetes_cluster_node_pool" "this" {
