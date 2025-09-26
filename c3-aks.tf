@@ -28,7 +28,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     os_disk_size_gb      = var.default_node_pool.os_disk_size_gb
     type                 = "VirtualMachineScaleSets"
     node_labels          = coalesce(try(var.default_node_pool.node_labels, null), {})
-    tags                 = merge(local.default_module_tags, var.global_tags, coalesce(try(var.default_node_pool.tags, null), {}))
+    tags                 = merge(local.default_module_tags, coalesce(var.global_tags, {}), coalesce(try(var.default_node_pool.tags, null), {}))
   }
   # Identity (System Assigned or Service Principal)
   identity {
@@ -41,7 +41,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     load_balancer_sku = "standard"
   }
 
-  tags = merge(local.default_module_tags, var.global_tags)
+  tags = merge(local.default_module_tags, coalesce(var.global_tags, {}))
 
 }
 
