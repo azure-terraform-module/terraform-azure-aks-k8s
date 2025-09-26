@@ -13,6 +13,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   resource_group_name = var.resource_group_name
   dns_prefix          = var.cluster_name
   kubernetes_version  = var.kubernetes_version != null ? var.kubernetes_version : data.azurerm_kubernetes_service_versions.current.latest_version
+  sku_tier            = var.sku_tier
   node_resource_group = "${var.resource_group_name}-nrg"
   default_node_pool {
     name       = var.default_node_pool.name
@@ -36,8 +37,26 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 
   # Network Profile
   network_profile {
-    network_plugin = "azure"
+    network_plugin = "azure" #cilium
     load_balancer_sku = "standard"
   }
 
+}
+
+# Collect unique subnet IDs from default and custom node pools
+locals {
+  aks_subnet_ids = toset([
+    for id in concat(
+      [var.default_node_pool.vnet_subnet_id],
+      [for np in var.custom_node_pool : try(np.vnet_subnet_id, null)]
+    ) : id if id != null
+  ])
+}
+
+# Assign Network Contributor on each subnet to the AKS managed identity
+resource "azurerm_role_assignment" "aks_network_contributor" {
+  for_each             = local.aks_subnet_ids
+  scope                = each.value
+  role_definition_name = "Network Contributor"
+  principal_id         = azurerm_kubernetes_cluster.aks_cluster.identity[0].principal_id
 }

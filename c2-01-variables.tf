@@ -73,7 +73,7 @@ variable "custom_node_pool" {
     node_labels          = map(string)
     # Added optionals for real-world pools
     vm_size               = optional(string)
-    mode                  = optional(string)                  # "User" or "System"
+    mode                  = optional(string, "User")           # "User" or "System"
     node_taints           = optional(list(string))
     tags                  = optional(map(string))
     max_pods              = optional(number)
@@ -82,4 +82,20 @@ variable "custom_node_pool" {
     spot_max_price        = optional(number)                  # for Spot: -1 or a price in USD/hour
   }))
   default = []
+
+  validation {
+    condition     = alltrue([for np in var.custom_node_pool : contains(["User", "System"], try(np.mode, "User"))])
+    error_message = "custom_node_pool.mode must be 'User' or 'System'."
+  }
+}
+
+variable "sku_tier" {
+  description = "The SKU Tier for the AKS control plane. Possible values: Free, Standard (Uptime SLA), Premium. Defaults to Free in provider; module default is Standard."
+  type        = string
+  default     = "Standard"
+
+  validation {
+    condition     = contains(["Free", "Standard", "Premium"], var.sku_tier)
+    error_message = "sku_tier must be one of 'Free', 'Standard', or 'Premium'."
+  }
 }
