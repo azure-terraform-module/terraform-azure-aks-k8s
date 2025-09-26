@@ -24,10 +24,10 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   auto_scaling_enabled = each.value.auto_scaling_enabled
   min_count            = each.value.auto_scaling_enabled ? each.value.min_count : null
   max_count            = each.value.auto_scaling_enabled ? each.value.max_count : null
-  node_count           = each.value.auto_scaling_enabled ? null : each.value.node_count
+  node_count           = each.value.auto_scaling_enabled ? null : try(each.value.node_count, null)
 
   # Labels and taints
-  node_labels = each.value.node_labels
+  node_labels = coalesce(try(each.value.node_labels, null), {})
   node_taints = try(each.value.node_taints, null)
   
   # Priority and spot-specific settings
@@ -35,5 +35,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   eviction_policy = lower(each.value.priority) == "spot" ? coalesce(try(each.value.eviction_policy, null), "Delete") : null
   spot_max_price  = lower(each.value.priority) == "spot" ? try(each.value.spot_max_price, -1) : null
 
-  tags = merge(coalesce(var.global_tags, {}), coalesce(try(each.value.tags, null), {}))
+  tags = merge(local.default_module_tags, var.global_tags, coalesce(try(each.value.tags, null), {}))
 }
