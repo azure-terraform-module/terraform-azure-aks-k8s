@@ -7,7 +7,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   for_each = local.pools_by_name
   kubernetes_cluster_id = azurerm_kubernetes_cluster.aks_cluster.id
   name                  = each.value.name
-  orchestrator_version  = var.kubernetes_version != null ? var.kubernetes_version : data.azurerm_kubernetes_service_versions.current.latest_version
+  orchestrator_version  = coalesce(var.kubernetes_version, azurerm_kubernetes_cluster.aks_cluster.kubernetes_version)
   
   # OS and sizing
   os_type         = each.value.os_type
