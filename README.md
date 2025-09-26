@@ -96,10 +96,13 @@ terraform apply
 - `sku_tier` (string): `Free | Standard | Premium`. Default: `Standard`.
 - `global_tags` (map(string)): Merged into node pool tags. Default: `{}`.
 - `default_node_pool` (object): Default/system pool settings.
-  - `name`, `vm_size`, `auto_scaling_enabled`, `node_count`, `min_count`, `max_count`, `os_disk_size_gb`, `vnet_subnet_id` (optional), `node_labels`, `tags`.
+  - Required: `name`, `vm_size`, `auto_scaling_enabled`, `min_count`, `max_count`, `os_disk_size_gb`.
+  - Optional: `vnet_subnet_id`, `node_count` (used only if autoscaling disabled), `node_labels`, `tags`.
 - `custom_node_pool` (list(object)): Zero or more user/system pools.
-  - Required: `name`, `os_type`, `os_disk_size_gb`, `priority`, `auto_scaling_enabled`, `node_count`, `min_count`, `max_count`, `node_labels`.
+  - Required: `name`, `os_type`, `os_disk_size_gb`, `priority`, `auto_scaling_enabled`, `min_count`, `max_count`.
   - Optional with defaults/notes:
+    - `node_count` (number): Only when autoscaling disabled; otherwise ignored.
+    - `node_labels` (map(string)): Defaults to `{}` if omitted.
     - `vm_size` (string): Required in practice; must be set for each custom pool.
     - `vnet_subnet_id` (string): Optional; when set, role assignment is created.
     - `mode` (string): `User | System`. Default: `User` (validated).

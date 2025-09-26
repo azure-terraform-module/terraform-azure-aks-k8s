@@ -22,12 +22,12 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     temporary_name_for_rotation = substr(lower("temp${var.default_node_pool.name}"), 0, 12)
     orchestrator_version  = coalesce(var.kubernetes_version, azurerm_kubernetes_cluster.aks_cluster.kubernetes_version)
     auto_scaling_enabled = var.default_node_pool.auto_scaling_enabled
-    node_count           = var.default_node_pool.node_count
+    node_count           = var.default_node_pool.auto_scaling_enabled ? null : try(var.default_node_pool.node_count, null)
     max_count            = var.default_node_pool.auto_scaling_enabled ? var.default_node_pool.max_count : null
     min_count            = var.default_node_pool.auto_scaling_enabled ? var.default_node_pool.min_count : null
     os_disk_size_gb      = var.default_node_pool.os_disk_size_gb
     type                 = "VirtualMachineScaleSets"
-    node_labels          = var.default_node_pool.node_labels
+    node_labels          = coalesce(try(var.default_node_pool.node_labels, null), {})
     tags                 = merge(local.default_module_tags, var.global_tags, coalesce(try(var.default_node_pool.tags, null), {}))
   }
   # Identity (System Assigned or Service Principal)

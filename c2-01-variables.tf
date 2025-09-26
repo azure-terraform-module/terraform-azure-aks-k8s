@@ -32,12 +32,12 @@ variable "default_node_pool" {
     vnet_subnet_id       = optional(string)
     vm_size              = string
     auto_scaling_enabled = bool
-    node_count           = number
+    node_count           = optional(number)
     max_count            = number
     min_count            = number
     os_disk_size_gb      = number
-    node_labels          = map(string)
-    tags                 = map(string)
+    node_labels          = optional(map(string))
+    tags                 = optional(map(string))
   })
 
   default = {
@@ -64,13 +64,13 @@ variable "custom_node_pool" {
     name                     = string
     vnet_subnet_id       = optional(string)
     auto_scaling_enabled = bool
-    node_count           = number
+    node_count           = optional(number)
     max_count            = number
     min_count            = number
     os_type              = string
     os_disk_size_gb      = number
     priority             = string
-    node_labels          = map(string)
+    node_labels          = optional(map(string))
     # Added optionals for real-world pools
     vm_size               = optional(string)
     mode                  = optional(string, "User")           # "User" or "System"
