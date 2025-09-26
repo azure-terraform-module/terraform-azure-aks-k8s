@@ -35,5 +35,5 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   eviction_policy = lower(each.value.priority) == "spot" ? coalesce(try(each.value.eviction_policy, null), "Delete") : null
   spot_max_price  = lower(each.value.priority) == "spot" ? try(each.value.spot_max_price, -1) : null
 
-  tags = merge(var.global_tags, coalesce(try(each.value.tags, null), {}))
+  tags = merge(local.default_module_tags, var.global_tags, coalesce(try(each.value.tags, null), {}))
 }
