@@ -41,6 +41,8 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     load_balancer_sku = "standard"
   }
 
+  tags = merge(local.default_module_tags, var.global_tags)
+
 }
 
 # Collect unique subnet IDs from default and custom node pools
