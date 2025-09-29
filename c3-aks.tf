@@ -15,6 +15,10 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   kubernetes_version  = coalesce(var.kubernetes_version, data.azurerm_kubernetes_service_versions.current.latest_version)
   sku_tier            = var.sku_tier
   node_resource_group = "${var.resource_group_name}-nrg"
+
+  # # Recommended for KEDA auth to Azure via Workload Identity
+  # oidc_issuer_enabled      = true
+  # workload_identity_enabled = true
   default_node_pool {
     name       = var.default_node_pool.name
     vm_size    = var.default_node_pool.vm_size
@@ -39,6 +43,20 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   network_profile {
     network_plugin = "azure" #cilium
     load_balancer_sku = "standard"
+  }
+
+  workload_autoscaler_profile {
+    keda_enabled = var.application_scaling.keda_enabled
+    vertical_pod_autoscaler_enabled = var.application_scaling.vertical_pod_autoscaler_enabled
+  }
+
+  dynamic "workload_autoscaler_profile" {
+    for_each = var.application_scaling == null ? [] : [var.application_scaling]
+
+    content {
+      keda_enabled                    = workload_autoscaler_profile.value.keda_enabled
+      vertical_pod_autoscaler_enabled = workload_autoscaler_profile.value.vertical_pod_autoscaler_enabled
+    }
   }
 
   tags = merge(local.default_module_tags, coalesce(var.global_tags, {}))
