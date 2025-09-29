@@ -32,6 +32,11 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     os_disk_size_gb      = var.default_node_pool.os_disk_size_gb
     type                 = "VirtualMachineScaleSets"
     node_labels          = coalesce(try(var.default_node_pool.node_labels, null), {})
+    upgrade_settings {
+      max_surge                     = "33%"
+      drain_timeout_in_minutes      = 30
+      node_soak_duration_in_minutes = 0
+    }
     tags                 = merge(local.default_module_tags, coalesce(var.global_tags, {}), coalesce(try(var.default_node_pool.tags, null), {}))
   }
   # Identity (System Assigned or Service Principal)
@@ -53,6 +58,7 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
       vertical_pod_autoscaler_enabled = workload_autoscaler_profile.value.vertical_pod_autoscaler_enabled
     }
   }
+  
 
   tags = merge(local.default_module_tags, coalesce(var.global_tags, {}))
 
