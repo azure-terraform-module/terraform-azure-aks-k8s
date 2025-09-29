@@ -45,11 +45,6 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     load_balancer_sku = "standard"
   }
 
-  workload_autoscaler_profile {
-    keda_enabled = var.application_scaling.keda_enabled
-    vertical_pod_autoscaler_enabled = var.application_scaling.vertical_pod_autoscaler_enabled
-  }
-
   dynamic "workload_autoscaler_profile" {
     for_each = var.application_scaling == null ? [] : [var.application_scaling]
 
