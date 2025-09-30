@@ -14,7 +14,7 @@ variable "cluster_name" {
 }
 
 variable "kubernetes_version" {
-    description = "Specifies the Kubernetes version for the AKS cluster. Leave this field empty or set to null to use the latest recommended version available at provisioning time. If a specific version is provided (e.g., '1.29'), that version will be used."
+    description = "Specifies the Kubernetes version for the AKS cluster. Leave this field empty or set to null to use the latest recommended version available at provisioning time. If a specific version is provided (e.g., '1.29'), that version will be used. Please use `az aks get-versions` command to get the supported version list in this region "
     type        = string
     default     = null
 }
@@ -38,6 +38,12 @@ variable "default_node_pool" {
     os_disk_size_gb      = number
     node_labels          = optional(map(string))
     tags                 = optional(map(string))
+    zones                = optional(list(string))
+    upgrade_settings     = optional(object({
+      drain_timeout_in_minutes      = number
+      node_soak_duration_in_minutes = number
+      max_surge                     = string
+    }))
   })
 
   default = {
@@ -51,6 +57,11 @@ variable "default_node_pool" {
     os_disk_size_gb      = 30
     node_labels = {
       "nodepool-type" = "system"
+    }
+    upgrade_settings = {
+      max_surge                     = "33%"
+      drain_timeout_in_minutes      = 30
+      node_soak_duration_in_minutes = 0
     }
     tags = {
       "nodepool-type" = "system"
@@ -80,6 +91,12 @@ variable "custom_node_pool" {
     # os_disk_type          = optional(string)                  # "Ephemeral" or "Managed"
     eviction_policy       = optional(string)                  # for Spot: "Delete" or "Deallocate"
     spot_max_price        = optional(number)                  # for Spot: -1 or a price in USD/hour
+    zones                 = optional(list(string))
+    upgrade_settings      = object({
+      drain_timeout_in_minutes      = optional(number, 30)
+      node_soak_duration_in_minutes = optional(number, 0)
+      max_surge                     = optional(string, "33%")
+    })
   }))
   default = []
 
