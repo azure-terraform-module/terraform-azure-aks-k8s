@@ -34,11 +34,16 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   priority        = each.value.priority
   eviction_policy = lower(each.value.priority) == "spot" ? coalesce(try(each.value.eviction_policy, null), "Delete") : null
   spot_max_price  = lower(each.value.priority) == "spot" ? try(each.value.spot_max_price, -1) : null
+  
+  zones           = each.value.zones
+  dynamic "upgrade_settings" {
+    for_each = each.value.upgrade_settings == null ? [] : ["upgrade_settings"]
 
-  upgrade_settings {
-    max_surge                     = "33%"
-    drain_timeout_in_minutes      = 30
-    node_soak_duration_in_minutes = 0
+    content {
+      max_surge                     = each.value.upgrade_settings.max_surge
+      drain_timeout_in_minutes      = each.value.upgrade_settings.drain_timeout_in_minutes
+      node_soak_duration_in_minutes = each.value.upgrade_settings.node_soak_duration_in_minutes
+    }
   }
 
   tags = merge(local.default_module_tags, var.global_tags, coalesce(try(each.value.tags, null), {}))
