@@ -14,7 +14,7 @@ variable "cluster_name" {
 }
 
 variable "kubernetes_version" {
-    description = "Specifies the Kubernetes version for the AKS cluster. Leave this field empty or set to null to use the latest recommended version available at provisioning time. If a specific version is provided (e.g., '1.29'), that version will be used."
+    description = "Specifies the Kubernetes version for the AKS cluster. Leave this field empty or set to null to use the latest recommended version available at provisioning time. If a specific version is provided (e.g., '1.29'), that version will be used. Please use `az aks get-versions` command to get the supported version list in this region "
     type        = string
     default     = null
 }
