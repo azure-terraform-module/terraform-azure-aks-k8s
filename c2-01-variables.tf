@@ -80,7 +80,7 @@ variable "custom_node_pool" {
     min_count            = number
     os_type              = string
     os_disk_size_gb      = number
-    priority             = string
+    priority             = optional(string, "Regular") # Spot
     node_labels          = optional(map(string))
     # Added optionals for real-world pools
     vm_size               = optional(string)
