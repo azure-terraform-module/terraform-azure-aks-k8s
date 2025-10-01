@@ -34,14 +34,10 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
     node_labels          = coalesce(try(var.default_node_pool.node_labels, null), {})
     zones                = var.default_node_pool.zones
 
-    dynamic "upgrade_settings" {
-      for_each = var.default_node_pool.upgrade_settings == null ? [] : ["upgrade_settings"]
-
-      content {
-        max_surge                     = var.default_node_pool.upgrade_settings.max_surge
-        drain_timeout_in_minutes      = var.default_node_pool.upgrade_settings.drain_timeout_in_minutes
-        node_soak_duration_in_minutes = var.default_node_pool.upgrade_settings.node_soak_duration_in_minutes
-      }
+    upgrade_settings {
+      max_surge                     = var.default_node_pool.upgrade_settings.max_surge
+      drain_timeout_in_minutes      = var.default_node_pool.upgrade_settings.drain_timeout_in_minutes
+      node_soak_duration_in_minutes = var.default_node_pool.upgrade_settings.node_soak_duration_in_minutes
     }
 
     
