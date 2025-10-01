@@ -9,6 +9,7 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   name                  = each.value.name
   orchestrator_version  = coalesce(var.kubernetes_version, data.azurerm_kubernetes_service_versions.current.latest_version)
   
+  temporary_name_for_rotation = substr(lower("temp${each.value.name}"), 0, 12)
   # OS and sizing
   os_type         = each.value.os_type
   vm_size         = each.value.vm_size
