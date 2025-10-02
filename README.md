@@ -42,6 +42,9 @@ module "aks" {
 
   # Pin a version or set null to use latest recommended
   kubernetes_version = null
+  
+  # Outbound routing method: loadBalancer (default) or userAssignedNATGateway
+  outbound_type = "loadBalancer"
 
   default_node_pool = {
     name                 = "systempool"
@@ -95,6 +98,7 @@ terraform apply
 - `cluster_name` (string): AKS cluster name. Required.
 - `kubernetes_version` (string|null): Version to deploy; when null, uses latest recommended.
 - `sku_tier` (string): `Free | Standard | Premium`. Default: `Standard`.
+- `outbound_type` (string): Outbound routing method. `loadBalancer | userAssignedNATGateway | managedNATGateway | userDefinedRouting`. Default: `loadBalancer`. **Note**: Module auto-detects and uses `userAssignedNATGateway` if all node pools have subnet IDs.
 - `global_tags` (map(string)): Merged into node pool tags. Default: `{}`.
 - `default_node_pool` (object): Default/system pool settings.
   - Required: `name`, `vm_size`, `auto_scaling_enabled`, `min_count`, `max_count`, `os_disk_size_gb`.
@@ -111,12 +115,13 @@ terraform apply
     - `node_taints` (list(string)), `tags` (map(string)), `max_pods` (number).
     - `eviction_policy` (string, Spot only), `spot_max_price` (number, Spot only).
     - `upgrade_settings` (object): Optional. Defaults to `max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0` for non-Spot pools.
+    - Windows pools automatically disable outbound NAT in `windows_profile`.
 
 ## Behavior and notes
 - Versioning: If `kubernetes_version` is null, the module uses the latest recommended version via the provider data source.
 - Role assignments: The module assigns the Network Contributor role to the cluster managed identity on every non-null, unique subnet referenced by the default and custom pools.
   - Ensure the caller has permission to create role assignments at the subnet scope.
-- Networking: Uses Azure CNI and `standard` load balancer SKU by default.
+- Networking: Uses Azure CNI and `standard` load balancer SKU by default. Outbound routing automatically uses `userAssignedNATGateway` when all node pools have subnet IDs assigned; otherwise defaults to the `outbound_type` variable (default: `loadBalancer`).
 - Defaults: `custom_node_pool.mode` defaults to "User" and is validated to "User" | "System".
   - Default node pool always uses `upgrade_settings` defaults unless overridden (`max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0`).
 - Control plane tier: `sku_tier` accepts `Free | Standard | Premium` (Standard includes Uptime SLA).

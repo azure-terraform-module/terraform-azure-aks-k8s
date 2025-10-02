@@ -45,7 +45,12 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
     }
   }
 
-  
+  dynamic "windows_profile" {
+    for_each = lower(each.value.os_type) == "windows" ? [1] : []
+    content {
+      outbound_nat_enabled = false // https://learn.microsoft.com/azure/aks/nat-gateway#disable-outboundnat-for-windows
+    }
+  }
 
   tags = merge(local.default_module_tags, var.global_tags, coalesce(try(each.value.tags, null), {}))
 }
