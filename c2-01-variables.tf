@@ -40,10 +40,14 @@ variable "default_node_pool" {
     tags                 = optional(map(string))
     zones                = optional(list(string))
     upgrade_settings     = optional(object({
-      drain_timeout_in_minutes      = number
-      node_soak_duration_in_minutes = number
-      max_surge                     = string
-    }))
+      drain_timeout_in_minutes      = optional(number, 30)
+      node_soak_duration_in_minutes = optional(number, 0)
+      max_surge                     = optional(string, "33%")
+    }), {
+      drain_timeout_in_minutes      = 30
+      node_soak_duration_in_minutes = 0
+      max_surge                     = "33%"
+    })
   })
 
   default = {
@@ -80,7 +84,7 @@ variable "custom_node_pool" {
     min_count            = number
     os_type              = string
     os_disk_size_gb      = number
-    priority             = string
+    priority             = optional(string, "Regular") # Spot
     node_labels          = optional(map(string))
     # Added optionals for real-world pools
     vm_size               = optional(string)
