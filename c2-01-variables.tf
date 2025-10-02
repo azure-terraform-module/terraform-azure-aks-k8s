@@ -132,3 +132,14 @@ variable "application_scaling" {
     `vertical_pod_autoscaler_enabled` - (Optional) Specifies whether Vertical Pod Autoscaler should be enabled.
 EOT
 }
+
+variable "outbound_type" {
+  description = "The outbound routing method for the AKS cluster. Possible values: loadBalancer, userAssignedNATGateway, managedNATGateway, userDefinedRouting. Default: loadBalancer."
+  type        = string
+  default     = "loadBalancer"
+
+  validation {
+    condition     = contains(["loadBalancer", "userAssignedNATGateway", "managedNATGateway", "userDefinedRouting"], var.outbound_type)
+    error_message = "outbound_type must be one of 'loadBalancer', 'userAssignedNATGateway', 'managedNATGateway', or 'userDefinedRouting'."
+  }
+}

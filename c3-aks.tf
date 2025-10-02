@@ -50,8 +50,9 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
 
   # Network Profile
   network_profile {
-    network_plugin = "azure" #cilium
+    network_plugin    = "azure" #cilium
     load_balancer_sku = "standard"
+    outbound_type     = local.effective_outbound_type
   }
 
   dynamic "workload_autoscaler_profile" {
