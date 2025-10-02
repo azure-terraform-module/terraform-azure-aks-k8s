@@ -54,6 +54,7 @@ module "aks" {
     os_disk_size_gb      = 64
     node_labels          = { "nodepool-type" = "system" }
     tags                 = { "nodepool-type" = "system" }
+    # upgrade_settings omitted -> defaults to max_surge="33%", drain_timeout=30, node_soak_duration=0
   }
 
   custom_node_pool = [
@@ -97,7 +98,8 @@ terraform apply
 - `global_tags` (map(string)): Merged into node pool tags. Default: `{}`.
 - `default_node_pool` (object): Default/system pool settings.
   - Required: `name`, `vm_size`, `auto_scaling_enabled`, `min_count`, `max_count`, `os_disk_size_gb`.
-  - Optional: `vnet_subnet_id`, `node_count` (used only if autoscaling disabled), `node_labels`, `tags`.
+  - Optional: `vnet_subnet_id`, `node_count` (used only if autoscaling disabled), `node_labels`, `tags`, `upgrade_settings`.
+    - `upgrade_settings` defaults to `max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0`.
 - `custom_node_pool` (list(object)): Zero or more user/system pools.
   - Required: `name`, `os_type`, `os_disk_size_gb`, `priority`, `auto_scaling_enabled`, `min_count`, `max_count`.
   - Optional with defaults/notes:
@@ -106,15 +108,17 @@ terraform apply
     - `vm_size` (string): Required in practice; must be set for each custom pool.
     - `vnet_subnet_id` (string): Optional; when set, role assignment is created.
     - `mode` (string): `User | System`. Default: `User` (validated).
-    - `node_taints` (list(string)), `tags` (map(string)), `max_pods` (number),
-      `eviction_policy` (string, Spot only), `spot_max_price` (number, Spot only).
+    - `node_taints` (list(string)), `tags` (map(string)), `max_pods` (number).
+    - `eviction_policy` (string, Spot only), `spot_max_price` (number, Spot only).
+    - `upgrade_settings` (object): Optional. Defaults to `max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0` for non-Spot pools.
 
 ## Behavior and notes
 - Versioning: If `kubernetes_version` is null, the module uses the latest recommended version via the provider data source.
 - Role assignments: The module assigns the Network Contributor role to the cluster managed identity on every non-null, unique subnet referenced by the default and custom pools.
   - Ensure the caller has permission to create role assignments at the subnet scope.
 - Networking: Uses Azure CNI and `standard` load balancer SKU by default.
-- Defaults: `custom_node_pool.mode` defaults to `"User"` and is validated to `"User" | "System"`.
+- Defaults: `custom_node_pool.mode` defaults to "User" and is validated to "User" | "System".
+  - Default node pool always uses `upgrade_settings` defaults unless overridden (`max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0`).
 - Control plane tier: `sku_tier` accepts `Free | Standard | Premium` (Standard includes Uptime SLA).
 
 ## Example: add a Spot pool
