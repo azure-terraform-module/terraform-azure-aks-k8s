@@ -1,10 +1,21 @@
 # Documentation Reference: https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/data-sources/kubernetes_service_versions
-
 # Datasource to get Latest Azure AKS latest Version
 
 data "azurerm_kubernetes_service_versions" "current" {
  location = var.resource_group_location
  include_preview = false
+}
+
+locals {
+  # Check if all node pools have subnet IDs assigned
+  default_pool_has_subnet = var.default_node_pool.vnet_subnet_id != null
+  custom_pools_have_subnets = length(var.custom_node_pool) == 0 ? true : alltrue([
+    for np in var.custom_node_pool : try(np.vnet_subnet_id, null) != null
+  ])
+  all_pools_have_subnets = local.default_pool_has_subnet && local.custom_pools_have_subnets
+  
+  # Auto-detect outbound_type: if all pools have subnets, use userAssignedNATGateway, otherwise use the variable
+  effective_outbound_type = local.all_pools_have_subnets ? "userAssignedNATGateway" : var.outbound_type
 }
 
 resource "azurerm_kubernetes_cluster" "aks_cluster" {
@@ -85,13 +96,4 @@ resource "azurerm_role_assignment" "aks_network_contributor" {
   scope                = each.value
   role_definition_name = "Network Contributor"
   principal_id         = azurerm_kubernetes_cluster.aks_cluster.identity[0].principal_id
-}
-
-data "azurerm_subscription" "primary" {}
-
-# Create the Role Assignment at the Subscription Scope
-resource "azurerm_role_assignment" "acr_pull_subscription_wide" {
-  scope                = data.azurerm_subscription.primary.id
-  role_definition_name = "AcrPull"
-  principal_id         = azurerm_kubernetes_cluster.aks_cluster.identity[0].principal_id                  
 }
