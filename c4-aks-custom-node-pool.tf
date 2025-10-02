@@ -40,8 +40,9 @@ resource "azurerm_kubernetes_cluster_node_pool" "this" {
   dynamic "upgrade_settings" {
     for_each = each.value.priority == "Spot" ? [] : [1]
     content {
-      max_surge                  = "33%" // A sensible default for non-Spot pools
-      drain_timeout_in_minutes   = 30
+      max_surge                     = each.value.upgrade_settings.max_surge
+      drain_timeout_in_minutes      = each.value.upgrade_settings.drain_timeout_in_minutes
+      node_soak_duration_in_minutes = each.value.upgrade_settings.node_soak_duration_in_minutes
     }
   }
 
