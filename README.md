@@ -8,11 +8,12 @@ Production-ready Terraform module to provision Azure Kubernetes Service (AKS) cl
 - Supports Spot priority pools, taints, labels, `mode` (default "User")
 - Sets Kubernetes version explicitly or uses the latest recommended version if omitted
 - Assigns Network Contributor to the cluster managed identity on all referenced subnets (default and custom pools)
+- Assigns AcrPull role to kubelet identity at subscription scope for ACR integration
 
 ### Prerequisites
 - Terraform >= 1.9 and AzureRM provider ~> 4.0 (configure the provider in your root module)
 - Existing Resource Group and Subnet(s) for the node pools
-- Permissions to create role assignments on the target subnets
+- Permissions to create role assignments on the target subnets and subscription (for ACR pull integration)
 
 ## Quickstart
 ```hcl
@@ -75,6 +76,7 @@ module "aks" {
       mode                 = "User"                      # default is "User"
       node_labels          = { workload = "general" }
       tags                 = { workload = "general" }
+      # upgrade_settings omitted -> defaults to max_surge="33%", drain_timeout=30, node_soak_duration=0
     }
   ]
 
@@ -123,8 +125,10 @@ terraform apply
   - Ensure the caller has permission to create role assignments at the subnet scope.
 - Networking: Uses Azure CNI and `standard` load balancer SKU by default. Outbound routing automatically uses `userAssignedNATGateway` when all node pools have subnet IDs assigned; otherwise defaults to the `outbound_type` variable (default: `loadBalancer`).
 - Defaults: `custom_node_pool.mode` defaults to "User" and is validated to "User" | "System".
-  - Default node pool always uses `upgrade_settings` defaults unless overridden (`max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0`).
+  - Both default and custom node pools use `upgrade_settings` defaults (`max_surge="33%"`, `drain_timeout_in_minutes=30`, `node_soak_duration_in_minutes=0`) unless overridden.
+  - Spot pools skip upgrade settings to avoid provider conflicts.
 - Control plane tier: `sku_tier` accepts `Free | Standard | Premium` (Standard includes Uptime SLA).
+- ACR Integration: Module automatically assigns AcrPull role to the cluster's kubelet identity at subscription scope.
 
 ## Example: add a Spot pool
 ```hcl

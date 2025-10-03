@@ -96,10 +96,14 @@ variable "custom_node_pool" {
     eviction_policy       = optional(string)                  # for Spot: "Delete" or "Deallocate"
     spot_max_price        = optional(number)                  # for Spot: -1 or a price in USD/hour
     zones                 = optional(list(string))
-    upgrade_settings      = object({
+    upgrade_settings     = optional(object({
       drain_timeout_in_minutes      = optional(number, 30)
       node_soak_duration_in_minutes = optional(number, 0)
       max_surge                     = optional(string, "33%")
+    }), {
+      drain_timeout_in_minutes      = 30
+      node_soak_duration_in_minutes = 0
+      max_surge                     = "33%"
     })
   }))
   default = []
