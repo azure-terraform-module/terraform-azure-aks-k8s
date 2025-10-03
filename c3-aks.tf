@@ -105,5 +105,8 @@ resource "azurerm_role_assignment" "acr_pull_subscription_wide" {
   scope                = data.azurerm_subscription.primary.id
   role_definition_name = "AcrPull"
   principal_id         = azurerm_kubernetes_cluster.aks_cluster.kubelet_identity[0].object_id
-  skip_service_principal_aad_check = true         
+  skip_service_principal_aad_check = true
+  lifecycle {
+    create_before_destroy = true
+  }    
 }
