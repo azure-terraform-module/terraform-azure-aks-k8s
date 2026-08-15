@@ -27,6 +27,10 @@ resource "azurerm_kubernetes_cluster" "aks_cluster" {
   sku_tier            = var.sku_tier
   node_resource_group = "${var.resource_group_name}-nrg"
 
+  node_provisioning_profile {
+    mode = "Manual"
+  }
+
   # # Recommended for KEDA auth to Azure via Workload Identity
   # oidc_issuer_enabled      = true
   # workload_identity_enabled = true
