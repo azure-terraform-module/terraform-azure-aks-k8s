@@ -11,7 +11,7 @@ Production-ready Terraform module to provision Azure Kubernetes Service (AKS) cl
 - Assigns AcrPull role to kubelet identity at subscription scope for ACR integration
 
 ### Prerequisites
-- Terraform >= 1.9 and AzureRM provider ~> 4.0 (configure the provider in your root module)
+- Terraform >= 1.9 and AzureRM provider ~> 5.0 (configure the provider in your root module)
 - Existing Resource Group and Subnet(s) for the node pools
 - Permissions to create role assignments on the target subnets and subscription (for ACR pull integration)
 
@@ -22,7 +22,7 @@ terraform {
   required_providers {
     azurerm = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.0"
+      version = "~> 5.0"
     }
   }
 }
